@@ -1,0 +1,128 @@
+@page "/liff"
+@model CoffeeStamp.Web.Pages.Liff.IndexModel
+@{
+    ViewData["Title"] = "บัตรสะสมแต้ม";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="csrf-token" content="@Model.CsrfToken" />
+    <meta name="theme-color" content="#4b2e21" />
+    <title>@ViewData["Title"] · @Model.ShopName</title>
+    <link rel="icon" href="~/icons/favicon.svg" type="image/svg+xml" />
+
+    @* หน้านี้ลูกค้าเห็น จึงใช้ฟอนต์ชุดเดียวกับเว็บร้านทั้งหมด รวม Parisienne สำหรับลายมือ *@
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Lora:wght@400;500;600&family=Noto+Serif+Thai:wght@400;500;600;700&family=Parisienne&display=swap" />
+
+    <link rel="stylesheet" href="~/css/brand.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/liff.css" asp-append-version="true" />
+</head>
+<body class="liff-body"
+      data-liff-id="@Model.LiffId"
+      data-consent-version="@Model.ConsentVersion"
+      data-dev-mock="@(Model.AllowDevMockLogin ? "true" : "false")">
+
+    <main class="liff-wrap">
+        <header class="liff-header">
+            <div class="liff-shop">@Model.ShopName</div>
+            <div class="liff-sub">บัตรสะสมแต้ม</div>
+        </header>
+
+        <section id="loading" class="card">
+            <p class="text-muted">กำลังเชื่อมต่อกับ LINE…</p>
+        </section>
+
+        <section id="error" class="alert alert-error" hidden></section>
+
+        <!-- ขอความยินยอม PDPA ก่อนเริ่มใช้งาน -->
+        <section id="consent" class="card" hidden>
+            <h2>ขอความยินยอมในการเก็บข้อมูล</h2>
+            <div class="consent-text">
+                <p>
+                    ร้าน @Model.ShopName ขอเก็บและใช้ข้อมูลต่อไปนี้เพื่อให้บริการบัตรสะสมแต้ม
+                </p>
+                <ul>
+                    <li>ชื่อที่แสดงและรูปโปรไฟล์จากบัญชี LINE ของคุณ</li>
+                    <li>รหัสผู้ใช้ LINE เพื่อผูกกับบัตรสะสมแต้มและใช้ส่งข้อความแจ้งแต้ม</li>
+                    <li>ประวัติการได้รับและใช้แต้ม พร้อมหมายเลขออเดอร์และเวลา</li>
+                </ul>
+                <p>
+                    ร้านใช้ข้อมูลนี้เพื่อสะสมแต้ม แจ้งเตือนแต้ม และตรวจสอบความถูกต้องของรายการเท่านั้น
+                    ไม่ส่งต่อให้บุคคลอื่นเพื่อการตลาด
+                    คุณขอดูหรือขอถอนความยินยอมได้ที่หน้านี้หรือแจ้งพนักงานที่ร้าน
+                    เมื่อถอนความยินยอม ร้านจะปิดบัตรและลบชื่อกับรูปโปรไฟล์ออก
+                    แต่ยังเก็บประวัติแต้มไว้เป็นหลักฐานทางบัญชี
+                </p>
+                <p class="hint">เวอร์ชันข้อความ: @Model.ConsentVersion</p>
+            </div>
+            <button type="button" class="btn btn-green btn-block btn-lg" id="consent-accept">
+                ยอมรับและเริ่มใช้บัตร
+            </button>
+            <a class="btn btn-outline btn-block mt-2" href="/liff/privacy">อ่านรายละเอียดเพิ่มเติม</a>
+        </section>
+
+        <!-- บัตรสะสมแต้ม -->
+        <section id="card" hidden>
+            <div class="card stamp-card">
+                <div class="stamp-name" id="customer-name"></div>
+                <div class="stamp-count">
+                    <span id="balance">0</span><span class="stamp-of">/<span id="per-reward">10</span></span>
+                </div>
+                <div class="stamp-dots" id="stamp-dots" aria-hidden="true"></div>
+                <div id="reward-note" class="stamp-note"></div>
+            </div>
+
+            <div class="card qr-card">
+                <div class="card-title">ให้พนักงานสแกน QR นี้</div>
+                <div id="qr-holder" class="qr-holder">
+                    <img id="qr-image" alt="QR สมาชิกของคุณ" />
+                </div>
+                <p class="hint" id="qr-timer"></p>
+                <p class="hint">
+                    QR เปลี่ยนทุก 30 วินาทีและใช้ได้ครั้งเดียว
+                    การแคปหน้าจอหรือส่งต่อให้คนอื่นจะใช้ไม่ได้
+                </p>
+                <button type="button" class="btn btn-outline btn-block" id="qr-refresh">
+                    ขอ QR ใหม่
+                </button>
+            </div>
+
+            <div class="card" id="expiring-card" hidden>
+                <div class="card-title">แต้มที่ใกล้หมดอายุ</div>
+                <ul class="plain-list" id="expiring-list"></ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title">ประวัติแต้ม</div>
+                <ul class="plain-list" id="history-list"></ul>
+                <p class="text-muted" id="history-empty" hidden>ยังไม่มีประวัติ</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">ข้อมูลส่วนตัว</div>
+                <p class="hint">
+                    คุณให้ความยินยอมไว้เมื่อ <span id="consent-at"></span>
+                </p>
+                <button type="button" class="btn btn-outline btn-block" id="withdraw">
+                    ถอนความยินยอมและปิดบัตร
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    @if (Model.LiffSdkEnabled)
+    {
+        <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
+    }
+    <script src="~/js/liff-card.js" asp-append-version="true"></script>
+</body>
+</html>

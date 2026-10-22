@@ -1,0 +1,196 @@
+@page
+@using CoffeeStamp.Web.Services
+@model DailyCloseModel
+@{
+    ViewData["Title"] = "ปิดยอดรายวัน";
+    var summary = Model.Summary;
+}
+
+<h1>ปิดยอดวัน @Model.BusinessDate.ToString("dd/MM/yyyy")</h1>
+
+<form method="get" class="card">
+    <div class="field-row">
+        <div class="field">
+            <label for="date">วันทำการ</label>
+            <input type="date" id="date" name="date" value="@Model.BusinessDate.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="field" style="display:flex; align-items:flex-end;">
+            <button type="submit" class="btn btn-outline">ดู</button>
+        </div>
+    </div>
+</form>
+
+@if (Model.LoadError is not null)
+{
+    <div class="alert alert-error mt-2">@Model.LoadError</div>
+}
+else if (summary is not null)
+{
+    <div class="summary-grid mt-2">
+        <div class="stat">
+            <div class="label">เงินสดที่ควรมี</div>
+            <div class="value mono">@Money.Format(summary.ExpectedCash) ฿</div>
+        </div>
+        <div class="stat">
+            <div class="label">พร้อมเพย์ที่ควรเข้า</div>
+            <div class="value mono">@Money.Format(summary.ExpectedPromptPay) ฿</div>
+        </div>
+        <div class="stat">
+            <div class="label">เป๋าตังที่ควรเข้า</div>
+            <div class="value mono">@Money.Format(summary.ExpectedPaoTang) ฿</div>
+        </div>
+        <div class="stat">
+            <div class="label">รวมที่คาดไว้</div>
+            <div class="value mono">@Money.Format(summary.ExpectedTotal) ฿</div>
+        </div>
+        <div class="stat">
+            <div class="label">ออเดอร์ที่รับเงินแล้ว</div>
+            <div class="value mono">@summary.PaidOrderCount</div>
+        </div>
+        <div class="stat">
+            <div class="label">ยกเลิกหลังรับเงิน</div>
+            <div class="value mono">@summary.VoidedOrderCount</div>
+        </div>
+    </div>
+
+    @if (summary.IsClosed && summary.Close is not null)
+    {
+        <div class="card">
+            <div class="card-title">ปิดยอดแล้ว</div>
+            <p>
+                ปิดโดย <strong>@summary.Close.ClosedByStaff?.Name</strong>
+                เวลา @BangkokTime.FormatDateTime(summary.Close.ClosedAt)
+            </p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ช่องทาง</th>
+                            <th class="num">ที่คาดไว้</th>
+                            <th class="num">ที่นับได้</th>
+                            <th class="num">ส่วนต่าง</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>เงินสด</td>
+                            <td class="num mono">@Money.Format(summary.Close.ExpectedCash)</td>
+                            <td class="num mono">@Money.Format(summary.Close.ActualCash)</td>
+                            <td class="num mono @Model.VarianceClass(summary.Close.VarianceCash)">
+                                @Money.Format(summary.Close.VarianceCash)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>พร้อมเพย์</td>
+                            <td class="num mono">@Money.Format(summary.Close.ExpectedPromptPay)</td>
+                            <td class="num mono">@Money.Format(summary.Close.ActualPromptPay)</td>
+                            <td class="num mono @Model.VarianceClass(summary.Close.VariancePromptPay)">
+                                @Money.Format(summary.Close.VariancePromptPay)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>เป๋าตัง</td>
+                            <td class="num mono">@Money.Format(summary.Close.ExpectedPaoTang)</td>
+                            <td class="num mono">@Money.Format(summary.Close.ActualPaoTang)</td>
+                            <td class="num mono @Model.VarianceClass(summary.Close.VariancePaoTang)">
+                                @Money.Format(summary.Close.VariancePaoTang)
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>รวม</th>
+                            <th class="num mono">@Money.Format(summary.Close.ExpectedTotal)</th>
+                            <th class="num mono">@Money.Format(summary.Close.ActualTotal)</th>
+                            <th class="num mono @Model.VarianceClass(summary.Close.VarianceTotal)">
+                                @Money.Format(summary.Close.VarianceTotal)
+                            </th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            @if (summary.Close.Note is not null)
+            {
+                <p class="mt-2"><strong>หมายเหตุ:</strong> @summary.Close.Note</p>
+            }
+            @if (Math.Abs(summary.Close.VarianceTotal) > Model.VarianceThreshold)
+            {
+                <div class="alert alert-warn mt-2">
+                    ส่วนต่างเกินเกณฑ์ @Money.Format(Model.VarianceThreshold) ฿ ที่ตั้งไว้
+                    ควรตรวจกับออเดอร์ของวันนี้
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        @if (summary.PendingOrderCount > 0)
+        {
+            <div class="alert alert-warn">
+                ยังมีออเดอร์ที่รอยืนยันรับเงิน @summary.PendingOrderCount รายการ
+                <a href="/Orders?date=@Model.BusinessDate.ToString("yyyy-MM-dd")">จัดการที่หน้าออเดอร์</a>
+                ก่อนปิดยอด
+            </div>
+        }
+
+        <div class="card">
+            <div class="card-title">กรอกยอดจริงที่นับได้</div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="actual-cash">เงินสดที่นับได้</label>
+                    <input type="number" id="actual-cash" step="0.01" min="0" inputmode="decimal"
+                           value="@summary.ExpectedCash" />
+                </div>
+                <div class="field">
+                    <label for="actual-promptpay">พร้อมเพย์จากแอปธนาคาร</label>
+                    <input type="number" id="actual-promptpay" step="0.01" min="0" inputmode="decimal"
+                           value="@summary.ExpectedPromptPay" />
+                </div>
+                <div class="field">
+                    <label for="actual-paotang">ยอดจากแอปถุงเงิน</label>
+                    <input type="number" id="actual-paotang" step="0.01" min="0" inputmode="decimal"
+                           value="@summary.ExpectedPaoTang" />
+                </div>
+            </div>
+            <div class="field">
+                <label for="close-note">หมายเหตุ (ถ้ามีส่วนต่างควรอธิบายไว้)</label>
+                <textarea id="close-note" maxlength="500"></textarea>
+            </div>
+            <button type="button" class="btn btn-green btn-block btn-lg" id="close-submit"
+                    data-date="@Model.BusinessDate.ToString("yyyy-MM-dd")">
+                ปิดยอดวันนี้
+            </button>
+            <p class="hint mt-1">ปิดยอดแล้วออเดอร์ของวันนี้จะแก้ไขไม่ได้อีก</p>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            "use strict";
+            const button = document.getElementById("close-submit");
+            if (!button) { return; }
+
+            const api = window.CoffeeStamp.api;
+            const toast = window.CoffeeStamp.toast;
+
+            button.addEventListener("click", async function () {
+                if (!window.confirm("ยืนยันปิดยอด? หลังปิดแล้วแก้ไขออเดอร์ของวันนี้ไม่ได้")) { return; }
+
+                button.disabled = true;
+                try {
+                    await api.post("/api/daily-close/" + button.dataset.date, {
+                        actualCash: Number(document.getElementById("actual-cash").value || 0),
+                        actualPromptPay: Number(document.getElementById("actual-promptpay").value || 0),
+                        actualPaoTang: Number(document.getElementById("actual-paotang").value || 0),
+                        note: document.getElementById("close-note").value || null
+                    });
+                    toast("ปิดยอดเรียบร้อย", "success");
+                    setTimeout(function () { window.location.reload(); }, 700);
+                } catch (err) {
+                    toast(err.message, "error");
+                    button.disabled = false;
+                }
+            });
+        })();
+    </script>
+}

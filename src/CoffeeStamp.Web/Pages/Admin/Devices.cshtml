@@ -1,0 +1,121 @@
+@page
+@using CoffeeStamp.Web.Services
+@model CoffeeStamp.Web.Pages.Admin.DevicesModel
+@{
+    ViewData["Title"] = "จัดการอุปกรณ์";
+}
+
+<h1>จัดการอุปกรณ์</h1>
+
+<nav class="row-actions mt-1">
+    <a class="btn btn-sm btn-outline" href="/Admin/Settings">ตั้งค่า</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Menu">เมนู</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Staff">พนักงาน</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Devices">อุปกรณ์</a>
+</nav>
+
+@if (Model.Message is not null)
+{
+    <div class="alert alert-ok mt-2">@Model.Message</div>
+}
+@if (Model.Error is not null)
+{
+    <div class="alert alert-error mt-2">@Model.Error</div>
+}
+
+@if (Model.IsBootstrap)
+{
+    <div class="alert alert-warn mt-2">
+        ยังไม่มีอุปกรณ์ที่ลงทะเบียน ตอนนี้ใครก็ล็อกอินจากเครื่องไหนก็ได้
+        ให้สร้างอุปกรณ์แล้วลงทะเบียนเครื่องที่ใช้หน้าร้านทันที
+    </div>
+}
+
+<form method="post" asp-page-handler="Create" class="card mt-2">
+    <div class="card-title">เพิ่มอุปกรณ์</div>
+    <div class="field-row">
+        <div class="field">
+            <label for="name">ชื่ออุปกรณ์ เช่น แท็บเล็ตหน้าเคาน์เตอร์</label>
+            <input type="text" id="name" name="name" maxlength="80" required />
+        </div>
+        <div class="field" style="display:flex; align-items:flex-end;">
+            <button type="submit" class="btn btn-green">สร้างรหัสลงทะเบียน</button>
+        </div>
+    </div>
+</form>
+
+<div class="card">
+    <div class="card-title">อุปกรณ์ทั้งหมด</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ชื่อ</th>
+                    <th>รหัสลงทะเบียน</th>
+                    <th>ลงทะเบียนเมื่อ</th>
+                    <th>ใช้งานล่าสุด</th>
+                    <th>สถานะ</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Devices.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-muted">ยังไม่มีอุปกรณ์</td></tr>
+                }
+                @foreach (var device in Model.Devices)
+                {
+                    <tr>
+                        <td>@device.Name</td>
+                        <td class="mono">
+                            @if (device.RegistrationCode is not null)
+                            {
+                                <strong>@device.RegistrationCode</strong>
+                                <div class="hint">เปิด /Device/Register ที่เครื่องนั้นแล้วกรอกรหัสนี้</div>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td class="mono">
+                            @(device.RegisteredAt is null
+                                ? "-"
+                                : BangkokTime.FormatDateTime(device.RegisteredAt.Value))
+                        </td>
+                        <td class="mono">
+                            @(device.LastSeenAt is null
+                                ? "-"
+                                : BangkokTime.FormatDateTime(device.LastSeenAt.Value))
+                        </td>
+                        <td>
+                            <span class="badge @(device.IsActive ? "badge-paid" : "badge-cancelled")">
+                                @(device.IsActive ? "ใช้งาน" : "ปิดใช้งาน")
+                            </span>
+                            @if (!device.IsRegistered)
+                            {
+                                <div class="hint">รอลงทะเบียน</div>
+                            }
+                        </td>
+                        <td class="row-actions">
+                            <form method="post" asp-page-handler="SetActive">
+                                <input type="hidden" name="id" value="@device.Id" />
+                                <input type="hidden" name="isActive" value="@(!device.IsActive)" />
+                                <button type="submit" class="btn btn-sm btn-outline">
+                                    @(device.IsActive ? "ปิดใช้งาน" : "เปิดใช้งาน")
+                                </button>
+                            </form>
+                            <form method="post" asp-page-handler="Reissue">
+                                <input type="hidden" name="id" value="@device.Id" />
+                                <button type="submit" class="btn btn-sm btn-amber">ออกรหัสใหม่</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="hint mt-1">
+        ปิดใช้งานอุปกรณ์แล้วเซสชันบนเครื่องนั้นจะถูกตัดทันที ใช้ตอนเครื่องหายหรือเลิกใช้
+    </p>
+</div>

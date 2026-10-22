@@ -1,0 +1,103 @@
+@page "/"
+@model StampModel
+@{
+    ViewData["Title"] = "สแตมป์";
+}
+
+<h1>สแตมป์ให้ลูกค้า</h1>
+
+@if (!Model.HasDevice)
+{
+    <div class="alert alert-error">
+        เครื่องนี้ยังไม่ได้ลงทะเบียนเป็นอุปกรณ์ของร้าน จึงยังสแตมป์ไม่ได้
+        @if (Model.IsManager)
+        {
+            <text>— <a href="/Admin/Devices">สร้างรหัสที่หน้าอุปกรณ์</a> แล้วลงทะเบียนที่
+            <a href="/Device/Register">หน้าลงทะเบียน</a></text>
+        }
+    </div>
+}
+
+<div class="stamp-flow">
+    <!-- ขั้นที่ 1 เลือกลูกค้า -->
+    <section class="card">
+        <div class="card-title">1. ลูกค้า</div>
+        <div id="chosen" class="chosen-customer" hidden>
+            <div>
+                <div class="chosen-name" id="chosen-name"></div>
+                <div class="hint" id="chosen-sub"></div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline" id="change-customer">เปลี่ยน</button>
+        </div>
+
+        <div id="pick-area">
+            <div class="field">
+                <label for="cust-search">ค้นชื่อหรือเบอร์โทร</label>
+                <input type="search" id="cust-search" autocomplete="off"
+                       placeholder="เช่น สมหญิง หรือ 0812" />
+            </div>
+            <div id="cust-results"></div>
+            <div class="row-actions mt-1">
+                <button type="button" class="btn btn-outline" id="scan-qr">สแกน QR ลูกค้า</button>
+                <a class="btn btn-outline" href="/Customers">เพิ่มสมาชิกใหม่</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ขั้นที่ 2 จำนวนแก้ว -->
+    <section class="card">
+        <div class="card-title">2. จำนวนแก้วที่นับแต้ม</div>
+        <div class="cup-grid" id="cup-grid">
+            @for (var n = 1; n <= 6; n++)
+            {
+                <button type="button" class="cup-btn@(n == 1 ? " cup-selected" : "")" data-cups="@n">@n</button>
+            }
+        </div>
+        <div class="field mt-2">
+            <label for="amount">ยอดเงิน (ไม่บังคับ)</label>
+            <input type="number" id="amount" step="0.01" min="0" inputmode="decimal"
+                   placeholder="เว้นว่างได้ถ้ายังไม่ใช้ระบบคิดเงิน" />
+        </div>
+    </section>
+
+    <!-- ขั้นที่ 3 ช่องทางจ่าย + ปุ่มสแตมป์ -->
+    <section class="card">
+        <div class="card-title">3. ช่องทางชำระ แล้วกดสแตมป์</div>
+        <div class="pay-grid" id="pay-grid">
+            <button type="button" class="pay-btn pay-selected" data-pay="Cash">เงินสด</button>
+            <button type="button" class="pay-btn" data-pay="PromptPay">พร้อมเพย์</button>
+            <button type="button" class="pay-btn" data-pay="PaoTang">เป๋าตัง</button>
+        </div>
+        <button type="button" class="btn btn-green btn-block stamp-button" id="do-stamp" disabled>
+            สแตมป์
+        </button>
+        <p class="hint mt-1">
+            ถ้าสแตมป์ผิด แก้ได้ที่หน้าสมาชิกหรือหน้าออเดอร์ ไม่ต้องออกบัตรใหม่
+        </p>
+    </section>
+
+    <!-- แลกรางวัล: แสดงเมื่อเลือกลูกค้าที่มีแต้มพอแล้ว -->
+    <section class="card" id="redeem-card" hidden>
+        <div class="card-title">แลกรางวัล</div>
+        <p class="hint" id="redeem-summary"></p>
+        <div id="redeem-options"></div>
+    </section>
+
+    <!-- ผลลัพธ์ -->
+    <section class="card" id="result-card" hidden>
+        <div class="stamp-result">
+            <div class="result-name" id="result-name"></div>
+            <div class="result-balance"><span id="result-balance">0</span><span id="result-of"></span></div>
+            <div id="result-note" class="hint"></div>
+            <div class="row-actions mt-2">
+                <button type="button" class="btn btn-sm btn-red" id="undo-stamp">สแตมป์ผิด ยกเลิก</button>
+                <a class="btn btn-sm btn-outline" id="result-customer-link" href="#">ดูบัตรลูกค้า</a>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/scan.js" asp-append-version="true"></script>
+    <script src="~/js/stamp.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,66 @@
+@page
+@model CustomersModel
+@{
+    ViewData["Title"] = "สมาชิก";
+}
+
+<h1>สมาชิกสะสมแต้ม</h1>
+
+@if (!Model.IsLiffEnabled)
+{
+    <div class="alert alert-warn">
+        ยังไม่ได้เปิดใช้ LINE (LIFF) ตอนนี้อยู่ในโหมดคีย์มือ
+        พนักงานสร้างสมาชิกและเลือกลูกค้าเองที่หน้าขาย
+    </div>
+}
+
+<div class="card">
+    <div class="card-title">ค้นหาสมาชิก</div>
+    <div class="field">
+        <label for="search">พิมพ์ชื่อหรือเบอร์โทร (ใส่ไม่ครบก็ค้นได้)</label>
+        <input type="search" id="search" autocomplete="off" inputmode="search"
+               placeholder="เช่น สมหญิง หรือ 0812" />
+    </div>
+    <div id="search-results" aria-live="polite"></div>
+</div>
+
+<div class="card">
+    <div class="card-title">เพิ่มสมาชิกใหม่ที่เคาน์เตอร์</div>
+    <div class="field-row">
+        <div class="field">
+            <label for="new-name">ชื่อลูกค้า</label>
+            <input type="text" id="new-name" maxlength="100" autocomplete="off" />
+        </div>
+        <div class="field">
+            <label for="new-phone">เบอร์โทร</label>
+            <input type="tel" id="new-phone" maxlength="20" inputmode="tel" autocomplete="off" />
+        </div>
+    </div>
+
+    <div class="checkbox">
+        <input type="checkbox" id="new-consent" />
+        <label for="new-consent" style="margin:0">
+            แจ้งข้อความขอความยินยอมให้ลูกค้าทราบแล้ว และลูกค้ายินยอม
+        </label>
+    </div>
+    <p class="hint">
+        ต้องอ่านข้อความที่ติดไว้ที่เคาน์เตอร์ให้ลูกค้าฟังก่อน (ดู <a href="/liff/privacy" target="_blank">ข้อความเต็ม</a>)
+        ระบบจะบันทึกว่ายินยอมผ่านช่องทางเคาน์เตอร์
+    </p>
+    <button type="button" class="btn btn-green" id="create-customer">เพิ่มสมาชิก</button>
+</div>
+
+<div class="modal-backdrop" id="customer-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+        <h2 id="detail-title">สมาชิก</h2>
+        <div id="detail-body"></div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-outline" id="detail-close">ปิด</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/scan.js" asp-append-version="true"></script>
+    <script src="~/js/customers.js" asp-append-version="true"></script>
+}

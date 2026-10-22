@@ -1,0 +1,202 @@
+/* ==========================================================================
+   หน้าบัตรลูกค้าใน LIFF — ลูกค้าเห็นหน้านี้ต่อจากเว็บร้าน
+   จึงใช้โทนเดียวกับเว็บ MInDCoffee เป๊ะ: พื้นมรกตเข้ม ทอง และ Playfair
+   ========================================================================== */
+
+.liff-body {
+    background:
+        radial-gradient(120% 80% at 50% 0%, var(--emerald-700) 0%, transparent 60%),
+        var(--emerald-900);
+    color: var(--cream-50);
+    padding: 0;
+    min-height: 100vh;
+}
+
+.liff-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1rem 1rem 2.5rem;
+}
+
+.liff-header {
+    text-align: center;
+    padding: 1.5rem 0 1.5rem;
+}
+
+.liff-header::after {
+    content: "";
+    display: block;
+    width: 64px;
+    height: 1px;
+    margin: 1rem auto 0;
+    background: var(--gold-400);
+    opacity: .7;
+}
+
+.liff-shop {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--cream-50);
+    letter-spacing: .01em;
+}
+
+.liff-sub {
+    font-size: .74rem;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--gold-400);
+    margin-top: .5rem;
+}
+
+/* การ์ดบนพื้นเข้ม — โปร่งเล็กน้อยให้เห็นพื้นหลังไล่สี */
+.liff-body .card {
+    background: rgba(10, 42, 36, .55);
+    border: 1px solid rgba(230, 240, 233, .14);
+    border-radius: var(--radius-lg);
+    color: var(--cream-50);
+    box-shadow: none;
+    backdrop-filter: blur(6px);
+}
+
+.liff-body .card-title {
+    font-family: var(--font-display);
+    color: var(--cream-50);
+    font-size: 1.05rem;
+}
+
+.liff-body h2 {
+    font-family: var(--font-display);
+    color: var(--cream-50);
+}
+
+.liff-body label { color: var(--cream-50); }
+.liff-body .hint { color: rgba(230, 240, 233, .62); }
+.liff-body .text-muted { color: rgba(230, 240, 233, .6); }
+
+.liff-body input,
+.liff-body textarea {
+    background: rgba(247, 246, 241, .06);
+    border-color: rgba(230, 240, 233, .22);
+    color: var(--cream-50);
+}
+
+.liff-body .btn-outline {
+    background: transparent;
+    color: var(--cream-50);
+    border-color: rgba(200, 169, 106, .45);
+}
+
+.liff-body .btn-outline:hover {
+    background: rgba(200, 169, 106, .14);
+    border-color: var(--gold-400);
+    color: var(--cream-50);
+}
+
+.liff-body .alert-error {
+    background: rgba(143, 47, 36, .22);
+    border-color: rgba(143, 47, 36, .5);
+    color: #f3d9d4;
+}
+
+/* --- บัตรแต้ม --- */
+.stamp-card {
+    text-align: center;
+    background:
+        linear-gradient(165deg, rgba(26, 97, 85, .95) 0%, rgba(10, 42, 36, .98) 100%);
+    border: 1px solid rgba(200, 169, 106, .45);
+    position: relative;
+    overflow: hidden;
+}
+
+.stamp-card::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(200, 169, 106, .22);
+    border-radius: calc(var(--radius-lg) - 6px);
+    pointer-events: none;
+}
+
+.stamp-name {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--gold-300);
+    margin-bottom: .35rem;
+}
+
+.stamp-count {
+    font-family: var(--font-display);
+    font-size: 3.6rem;
+    font-weight: 600;
+    line-height: 1.05;
+    color: var(--cream-50);
+    font-variant-numeric: tabular-nums;
+}
+
+.stamp-of { font-size: 1.5rem; color: var(--gold-400); }
+
+.stamp-dots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .45rem;
+    margin: .9rem 0 .6rem;
+}
+
+.dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid rgba(200, 169, 106, .55);
+}
+
+.dot-filled {
+    background: var(--gold-400);
+    border-color: var(--gold-400);
+    box-shadow: 0 0 10px rgba(200, 169, 106, .45);
+}
+
+.stamp-note { font-size: .98rem; color: rgba(230, 240, 233, .8); }
+
+.stamp-note-ready {
+    font-family: var(--font-script);
+    font-size: 1.5rem;
+    color: var(--gold-300);
+}
+
+/* --- QR --- */
+.qr-card { text-align: center; }
+
+.qr-holder {
+    background: var(--cream-50);
+    border-radius: var(--radius-md);
+    padding: .65rem;
+    display: inline-block;
+    min-height: 240px;
+    min-width: 240px;
+    box-shadow: 0 0 0 1px rgba(200, 169, 106, .5);
+}
+
+.qr-holder img {
+    width: 240px;
+    height: 240px;
+    image-rendering: pixelated;
+    display: block;
+}
+
+/* --- รายการ --- */
+.liff-body .plain-list li { border-bottom-color: rgba(230, 240, 233, .12); }
+.liff-body .qty-plus { color: var(--gold-300); }
+.liff-body .qty-minus { color: #e8b4ab; }
+
+/* --- ข้อความยินยอม --- */
+.consent-text { font-size: .98rem; line-height: 1.7; color: rgba(230, 240, 233, .86); }
+.consent-text ul { padding-left: 1.2rem; margin: .5rem 0; }
+.consent-text li { margin-bottom: .3rem; }
+.consent-text h2 { font-size: 1.1rem; margin: 1.2rem 0 .5rem; }
+
+.liff-body .toast {
+    background: var(--emerald-950);
+    border-color: rgba(200, 169, 106, .45);
+}

@@ -1,0 +1,85 @@
+@using CoffeeStamp.Web.Services
+@using Microsoft.AspNetCore.Antiforgery
+@inject StaffContext StaffCtx
+@inject IAntiforgery Antiforgery
+@inject SettingsService Settings
+@{
+    var token = Antiforgery.GetAndStoreTokens(ViewContext.HttpContext).RequestToken;
+    var isManager = StaffCtx.IsManagerOrAbove;
+
+    // ชื่อร้านมาจาก ShopSettings ที่เดียว เปลี่ยนที่หน้าตั้งค่าแล้วเปลี่ยนทุกหน้าพร้อมกัน
+    var shopName = await Settings.GetShopNameAsync();
+
+    // อ่านเวลา idle จาก ShopSettings เฉพาะตอนล็อกอินแล้ว ถ้า DB ยังไม่พร้อมให้ใช้ค่าปริยาย
+    var idleMinutes = 15;
+    if (StaffCtx.IsAuthenticated)
+    {
+        try
+        {
+            idleMinutes = (await Settings.GetAsync()).StaffIdleTimeoutMinutes;
+        }
+        catch (Exception)
+        {
+            idleMinutes = 15;
+        }
+    }
+}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="csrf-token" content="@token" />
+    <meta name="theme-color" content="#0f3d34" />
+    <title>@ViewData["Title"] · @shopName</title>
+    <link rel="manifest" href="~/manifest.webmanifest" />
+    <link rel="icon" href="~/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="~/icons/icon-192.png" />
+
+    @* ฟอนต์ชุดเดียวกับเว็บร้าน + Noto Serif Thai สำหรับข้อความไทยให้เข้าชุดกัน *@
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Lora:wght@400;500;600&family=Noto+Serif+Thai:wght@400;500;600;700&display=swap" />
+
+    <link rel="stylesheet" href="~/css/brand.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+</head>
+<body data-idle-minutes="@(StaffCtx.IsAuthenticated ? idleMinutes : 0)">
+    @if (StaffCtx.IsAuthenticated && !StaffCtx.MustChangePin)
+    {
+        <header class="topbar">
+            <nav class="topbar-nav">
+                <a class="nav-link brand-link" href="/">
+                    <img src="~/icons/favicon.svg" alt="" width="26" height="26" />
+                </a>
+                @* ช่วงแรกเปิดใช้แค่การสแตมป์ หน้าสแตมป์จึงเป็นหน้าหลัก
+                   ส่วนหน้าขายเต็มกับปิดยอดเก็บไว้ให้ผู้จัดการเท่านั้น ไม่รบกวนพนักงานหน้าร้าน *@
+                <a class="nav-link" href="/">สแตมป์</a>
+                <a class="nav-link" href="/Customers">สมาชิก</a>
+                <a class="nav-link" href="/Orders">ออเดอร์</a>
+                @if (isManager)
+                {
+                    <a class="nav-link" href="/Pos">ขายเต็ม</a>
+                    <a class="nav-link" href="/DailyClose">ปิดยอด</a>
+                    <a class="nav-link" href="/Admin/Settings">ตั้งค่า</a>
+                }
+            </nav>
+            <div class="topbar-user">
+                <span class="staff-name">@StaffCtx.Name</span>
+                <span class="staff-role">@StaffCtx.Role</span>
+                <button type="button" class="btn btn-ghost btn-sm" data-logout>ออกจากระบบ</button>
+            </div>
+        </header>
+    }
+
+    <main class="page">
+        @RenderBody()
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="~/js/app.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

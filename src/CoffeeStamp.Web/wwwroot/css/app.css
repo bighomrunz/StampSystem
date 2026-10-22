@@ -1,0 +1,697 @@
+/* ==========================================================================
+   Coffee Stamp — แอปพนักงาน
+   ใช้ CI เดียวกับเว็บร้าน (ดู brand.css) แต่สลับเป็นพื้นครีม/มิ้นต์เป็นหลัก
+   เพราะเป็นเครื่องมือที่ใช้ทั้งวันกลางร้านที่แสงจ้า ปุ่มใหญ่ ตัวเลขต้องอ่านไว
+   ส่วนหน้าบัตรลูกค้า (liff.css) ใช้พื้นมรกตเข้มตรงกับเว็บร้าน
+   ========================================================================== */
+
+* { box-sizing: border-box; }
+
+/* คลาสที่ตั้ง display เองจะทับ [hidden] ของเบราว์เซอร์ ทำให้กล่องที่ควรซ่อนโผล่ขึ้นมา
+   (เจอจริงกับกล่องลูกค้าที่เลือกในหน้าสแตมป์) จึงบังคับไว้ตรงนี้ที่เดียว */
+[hidden] { display: none !important; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--cream-50);
+    color: var(--emerald-900);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ปิด pull-to-refresh และไฮไลต์ตอนกดบนแท็บเล็ต */
+body {
+    overscroll-behavior-y: contain;
+    -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.005em;
+    margin: 0 0 1rem;
+}
+
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.3rem; margin-top: 1.5rem; }
+
+a { color: var(--emerald-700); }
+a.btn, a.nav-link { text-decoration: none; }
+
+:focus-visible {
+    outline: 2px solid var(--gold-400);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+.mono {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+.text-muted { color: rgba(15, 61, 52, .62); }
+.mt-1 { margin-top: .5rem; }
+.mt-2 { margin-top: 1rem; }
+
+/* ---------- แถบบน ---------- */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--emerald-900);
+    color: var(--cream-50);
+    padding: .5rem .75rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid rgba(200, 169, 106, .28);
+}
+
+.topbar-nav { display: flex; gap: .3rem; flex-wrap: wrap; }
+
+.topbar .nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.8rem;
+    border-radius: var(--radius-pill);
+    color: var(--cream-50);
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: .01em;
+    transition: background-color .25s var(--ease), color .25s var(--ease);
+}
+
+.topbar .nav-link:hover { color: var(--gold-300); }
+.topbar .nav-link:active { background: rgba(200, 169, 106, .18); }
+
+.topbar-user { display: flex; align-items: center; gap: .5rem; font-size: .9rem; }
+.topbar-user .btn { white-space: nowrap; }
+.staff-name { font-weight: 600; }
+.staff-role { color: var(--gold-400); letter-spacing: .08em; font-size: .78rem; text-transform: uppercase; }
+
+.page { padding: 1.25rem 1rem 3rem; max-width: 1240px; margin: 0 auto; }
+
+/* ---------- การ์ด ---------- */
+.card {
+    background: #fff;
+    border: 1px solid rgba(15, 61, 52, .1);
+    border-radius: var(--radius-lg);
+    padding: 1.15rem;
+    box-shadow: 0 1px 2px rgba(10, 42, 36, .05), 0 10px 24px -18px rgba(10, 42, 36, .45);
+}
+
+.card + .card { margin-top: 1rem; }
+
+.card-title {
+    font-family: var(--font-display);
+    font-size: 1.12rem;
+    font-weight: 600;
+    color: var(--emerald-900);
+    margin-bottom: .85rem;
+}
+
+/* ---------- ปุ่ม ---------- */
+.btn {
+    appearance: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    min-height: var(--touch);
+    padding: 0 1.4rem;
+    font-size: 1.02rem;
+    font-weight: 600;
+    font-family: inherit;
+    letter-spacing: .01em;
+    background: var(--emerald-900);
+    color: var(--cream-50);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    transition: background-color .25s var(--ease), border-color .25s var(--ease),
+        color .25s var(--ease), transform .2s var(--ease);
+}
+
+.btn:hover { background: var(--emerald-800); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+.btn-block { width: 100%; }
+.btn-sm { min-height: 40px; font-size: .92rem; padding: 0 .95rem; }
+.btn-lg { min-height: 68px; font-size: 1.15rem; }
+
+/* ปุ่มหลักของงานที่ "ลงมือทำ" ใช้ทองตาม CI */
+.btn-green {
+    background: var(--gold-400);
+    color: var(--emerald-950);
+}
+
+.btn-green:hover { background: var(--gold-300); }
+
+.btn-red { background: var(--danger-700); color: var(--cream-50); }
+.btn-red:hover { background: #7d281f; }
+
+.btn-amber { background: var(--gold-500); color: var(--emerald-950); }
+.btn-amber:hover { background: var(--gold-400); }
+
+.btn-outline {
+    background: transparent;
+    color: var(--emerald-900);
+    border-color: rgba(15, 61, 52, .28);
+}
+
+.btn-outline:hover {
+    background: var(--mint-100);
+    border-color: var(--gold-400);
+    color: var(--emerald-900);
+}
+
+.btn-ghost {
+    background: transparent;
+    border-color: rgba(230, 240, 233, .45);
+    color: var(--cream-50);
+}
+
+.btn-ghost:hover { background: rgba(200, 169, 106, .16); border-color: var(--gold-400); }
+
+/* ---------- ฟอร์ม ---------- */
+label {
+    display: block;
+    font-weight: 600;
+    font-size: .92rem;
+    color: var(--emerald-700);
+    margin-bottom: .3rem;
+}
+
+input, select, textarea {
+    width: 100%;
+    min-height: var(--touch);
+    padding: .5rem .9rem;
+    font-size: 1.02rem;
+    font-family: inherit;
+    color: var(--emerald-900);
+    background: #fff;
+    border: 1px solid rgba(15, 61, 52, .22);
+    border-radius: var(--radius-md);
+    transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+
+input::placeholder, textarea::placeholder { color: rgba(15, 61, 52, .38); }
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--gold-400);
+    box-shadow: 0 0 0 3px rgba(200, 169, 106, .25);
+}
+
+textarea { min-height: 92px; }
+.field { margin-bottom: .95rem; }
+.field-row { display: flex; gap: .75rem; flex-wrap: wrap; }
+.field-row > .field { flex: 1 1 200px; }
+
+.checkbox { display: flex; align-items: center; gap: .6rem; min-height: var(--touch); }
+.checkbox input { width: 26px; height: 26px; min-height: 0; accent-color: var(--emerald-700); }
+
+.hint { color: rgba(15, 61, 52, .6); font-size: .88rem; }
+
+/* ---------- POS (หน้าขายเต็ม) ---------- */
+.pos {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1rem;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .pos { grid-template-columns: 1fr; }
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: .75rem;
+}
+
+.menu-btn {
+    min-height: 96px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(15, 61, 52, .12);
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: .8rem;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .2s var(--ease), background-color .2s var(--ease);
+}
+
+.menu-btn:hover { border-color: var(--gold-400); background: var(--mint-100); }
+.menu-btn:active { background: var(--mint-100); }
+.menu-btn .name { font-weight: 600; font-size: 1rem; color: var(--emerald-900); }
+.menu-btn .price { color: var(--emerald-700); font-weight: 600; font-family: var(--font-num); }
+.menu-btn .no-stamp { font-size: .76rem; color: var(--gold-500); font-weight: 600; }
+
+.menu-cat {
+    margin: 1.25rem 0 .5rem;
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--gold-500);
+}
+
+.cart { position: sticky; top: 76px; }
+.cart-lines { list-style: none; margin: 0 0 .75rem; padding: 0; }
+
+.cart-line {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: .5rem;
+    align-items: center;
+    padding: .55rem 0;
+    border-bottom: 1px solid rgba(15, 61, 52, .1);
+}
+
+.cart-line .qty-group { display: flex; align-items: center; gap: .35rem; }
+
+.qty-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid rgba(15, 61, 52, .2);
+    background: var(--mint-100);
+    color: var(--emerald-900);
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.qty-btn:hover { border-color: var(--gold-400); }
+
+.cart-line .qty { min-width: 2ch; text-align: center; font-weight: 700; }
+.cart-line .line-total { min-width: 5.5ch; text-align: right; font-weight: 600; font-family: var(--font-num); }
+.cart-empty { color: rgba(15, 61, 52, .55); padding: 1rem 0; }
+
+.cart-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-num);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--emerald-900);
+    margin: .5rem 0 1rem;
+    padding-top: .75rem;
+    border-top: 1px solid var(--gold-400);
+}
+
+.pay-buttons { display: grid; gap: .6rem; }
+
+/* ---------- ตาราง ---------- */
+.table-wrap { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: .96rem;
+}
+
+th, td { padding: .7rem .6rem; text-align: left; border-bottom: 1px solid rgba(15, 61, 52, .1); }
+
+th {
+    background: var(--mint-100);
+    font-size: .76rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--emerald-700);
+}
+
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.badge {
+    display: inline-block;
+    padding: .2rem .6rem;
+    border-radius: var(--radius-pill);
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.badge-paid { background: var(--ok-100); color: var(--ok-700); }
+.badge-pending { background: var(--warn-100); color: var(--warn-700); }
+.badge-void { background: var(--danger-100); color: var(--danger-700); }
+.badge-cancelled { background: rgba(15, 61, 52, .08); color: rgba(15, 61, 52, .6); }
+
+/* ---------- ล็อกอิน / PIN ---------- */
+.pin-wrap { max-width: 440px; margin: 2rem auto; }
+
+.pin-display {
+    font-family: var(--font-num);
+    font-size: 2rem;
+    letter-spacing: .5rem;
+    text-align: center;
+    min-height: 64px;
+    border: 1px solid rgba(15, 61, 52, .18);
+    border-radius: var(--radius-md);
+    background: #fff;
+    color: var(--emerald-900);
+    padding: .6rem;
+    margin-bottom: .75rem;
+}
+
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+
+.keypad button {
+    min-height: 72px;
+    font-size: 1.6rem;
+    font-weight: 600;
+    font-family: var(--font-num);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(15, 61, 52, .16);
+    background: #fff;
+    color: var(--emerald-900);
+    cursor: pointer;
+    transition: background-color .2s var(--ease), border-color .2s var(--ease);
+}
+
+.keypad button:hover { background: var(--mint-100); border-color: var(--gold-400); }
+.keypad .btn-green { border-color: transparent; }
+
+.staff-list { display: grid; gap: .6rem; }
+
+/* ---------- Modal ---------- */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 42, 36, .62);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 50;
+}
+
+.modal-backdrop[hidden] { display: none; }
+
+.modal {
+    background: var(--cream-50);
+    border: 1px solid rgba(200, 169, 106, .35);
+    border-radius: var(--radius-lg);
+    padding: 1.35rem;
+    width: 100%;
+    max-width: 460px;
+    max-height: 92vh;
+    overflow: auto;
+    box-shadow: 0 30px 60px -30px rgba(10, 42, 36, .7);
+}
+
+.modal h2 { margin-top: 0; }
+.modal-actions { display: flex; gap: .6rem; margin-top: 1rem; }
+.modal-actions .btn { flex: 1; }
+
+.qr-box { text-align: center; }
+.qr-box img { width: 100%; max-width: 300px; image-rendering: pixelated; }
+
+.qr-amount {
+    font-family: var(--font-num);
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--emerald-900);
+    margin: .5rem 0;
+}
+
+/* ---------- แจ้งเตือน ---------- */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.25rem;
+    transform: translateX(-50%) translateY(140%);
+    background: var(--emerald-900);
+    color: var(--cream-50);
+    padding: .9rem 1.3rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(200, 169, 106, .35);
+    font-weight: 500;
+    max-width: 90vw;
+    transition: transform .22s var(--ease);
+    z-index: 100;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--danger-700); border-color: transparent; }
+.toast.success { background: var(--emerald-700); border-color: var(--gold-400); }
+
+.alert {
+    border-radius: var(--radius-md);
+    padding: .85rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid;
+    font-size: .96rem;
+}
+
+.alert-warn { background: var(--warn-100); border-color: rgba(138, 106, 36, .3); color: var(--warn-700); }
+.alert-error { background: var(--danger-100); border-color: rgba(143, 47, 36, .28); color: var(--danger-700); }
+.alert-ok { background: var(--ok-100); border-color: rgba(26, 97, 85, .3); color: var(--ok-700); }
+
+/* ---------- สรุปตัวเลข ---------- */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+.stat {
+    background: #fff;
+    border: 1px solid rgba(15, 61, 52, .1);
+    border-radius: var(--radius-md);
+    padding: .85rem;
+}
+
+.stat .label {
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--gold-500);
+}
+
+.stat .value {
+    font-family: var(--font-num);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--emerald-900);
+    font-variant-numeric: tabular-nums;
+}
+
+.variance-neg { color: var(--danger-700); }
+.variance-pos { color: var(--ok-700); }
+
+.row-actions { display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- รายการแบบไม่มีจุด (ใช้ร่วมกับหน้าสมาชิก) ---------- */
+.plain-list { list-style: none; margin: 0; padding: 0; }
+
+.plain-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .75rem;
+    padding: .65rem 0;
+    border-bottom: 1px solid rgba(15, 61, 52, .1);
+}
+
+.plain-list li:last-child { border-bottom: none; }
+
+.qty-plus { font-weight: 700; color: var(--ok-700); font-variant-numeric: tabular-nums; }
+.qty-minus { font-weight: 700; color: var(--danger-700); font-variant-numeric: tabular-nums; }
+
+/* ---------- สแกน QR ลูกค้า ---------- */
+.scan-view {
+    background: var(--emerald-950);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: .75rem;
+    min-height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scan-view video,
+.scan-view #cs-scan-reader { width: 100%; max-height: 320px; }
+.scan-view video { display: block; object-fit: cover; }
+
+/* ---------- หน้าสแตมป์ (หน้าหลัก) ---------- */
+.stamp-flow {
+    display: grid;
+    gap: 1rem;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.chosen-customer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--mint-100);
+    border: 1px solid rgba(200, 169, 106, .4);
+    border-radius: var(--radius-md);
+    padding: .85rem;
+}
+
+.chosen-name {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--emerald-900);
+}
+
+.cup-grid,
+.pay-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .6rem;
+}
+
+.cup-btn,
+.pay-btn {
+    min-height: 74px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(15, 61, 52, .16);
+    background: #fff;
+    color: var(--emerald-900);
+    font-family: var(--font-num);
+    font-size: 1.6rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color .2s var(--ease), border-color .2s var(--ease),
+        color .2s var(--ease);
+}
+
+.pay-btn { font-family: var(--font-body); font-size: 1rem; font-weight: 600; }
+
+.cup-btn:hover,
+.pay-btn:hover { border-color: var(--gold-400); background: var(--mint-100); }
+
+.cup-selected,
+.pay-selected {
+    background: var(--emerald-900);
+    border-color: var(--emerald-900);
+    color: var(--cream-50);
+}
+
+.cup-selected:hover,
+.pay-selected:hover { background: var(--emerald-800); color: var(--cream-50); }
+
+.stamp-button {
+    min-height: 86px;
+    font-size: 1.45rem;
+    font-family: var(--font-display);
+    margin-top: 1rem;
+    letter-spacing: .02em;
+}
+
+/* ผลลัพธ์หลังสแตมป์ — ให้พนักงานกวาดตาเห็นยอดได้ในแวบเดียว */
+.stamp-result {
+    text-align: center;
+    background: var(--emerald-900);
+    color: var(--cream-50);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1rem;
+    margin: -1.15rem;
+}
+
+.result-name {
+    font-weight: 600;
+    color: var(--gold-300);
+    letter-spacing: .04em;
+}
+
+.result-balance {
+    font-family: var(--font-num);
+    font-size: 3.4rem;
+    font-weight: 700;
+    color: var(--cream-50);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+}
+
+.result-balance span:last-child { font-size: 1.5rem; color: var(--gold-400); }
+.stamp-result .hint { color: rgba(230, 240, 233, .72); }
+.stamp-result .btn-outline { color: var(--cream-50); border-color: rgba(230, 240, 233, .4); }
+.stamp-result .btn-outline:hover { background: rgba(200, 169, 106, .16); color: var(--cream-50); }
+
+/* ---------- แบรนด์เล็ก ๆ บนหัวหน้าจอล็อกอิน ---------- */
+.brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    margin-bottom: 1.25rem;
+}
+
+.brand-mark img { width: 44px; height: 44px; }
+
+.brand-mark .brand-name {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--emerald-900);
+}
+
+/* แถบเล็ก ๆ บอกหมวดเหนือหัวข้อ ตามสไตล์เว็บร้าน */
+.eyebrow {
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--gold-500);
+    margin-bottom: .4rem;
+}
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--mint-100); }
+::-webkit-scrollbar-thumb { background: var(--emerald-600); border-radius: var(--radius-pill); }
+::-webkit-scrollbar-thumb:hover { background: var(--gold-500); }
+
+/* โลโก้เล็กบนแถบบน */
+.topbar .brand-link { padding: 0 .55rem 0 .35rem; }
+.topbar .brand-link img { display: block; border-radius: 6px; }
+
+/* บนแท็บเล็ต เมนูของผู้จัดการมีหลายอันจนตกบรรทัด
+   ให้เลื่อนแนวนอนแทน แถบบนจะได้สูงเท่าเดิมเสมอ */
+@media (max-width: 880px) {
+    .topbar { flex-wrap: nowrap; }
+
+    .topbar-nav {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .topbar-nav::-webkit-scrollbar { display: none; }
+    .topbar .nav-link { white-space: nowrap; }
+    .staff-role { display: none; }
+
+    .staff-name {
+        max-width: 10ch;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

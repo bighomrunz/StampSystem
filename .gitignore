@@ -1,0 +1,28 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+*.sln.docstates
+
+## ข้อมูลที่ต้องไม่หลุดขึ้น repo
+# connection string, LINE channel secret, PIN ตั้งต้น ให้อยู่ใน user-secrets
+# หรือ environment variable เท่านั้น
+appsettings.Local.json
+appsettings.*.Local.json
+secrets.json
+*.env
+.env*
+
+## ฐานข้อมูลและ log ที่เกิดจากการรันเครื่องตัวเอง
+*.log
+logs/
+db-data/
+pgdata/
+
+## ไฟล์ระบบปฏิบัติการ
+Thumbs.db
+desktop.ini
+.DS_Store

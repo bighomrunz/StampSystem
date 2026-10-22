@@ -1,0 +1,17 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "เกิดข้อผิดพลาด";
+}
+
+<div class="pin-wrap">
+    <h1>เกิดข้อผิดพลาด</h1>
+    <div class="card">
+        <p>ระบบทำรายการไม่สำเร็จ กรุณาลองใหม่ ถ้ายังไม่ได้ให้แจ้งผู้ดูแลระบบ</p>
+        @if (Model.RequestId is not null)
+        {
+            <p class="hint">รหัสอ้างอิง: <span class="mono">@Model.RequestId</span></p>
+        }
+        <a class="btn btn-outline btn-block mt-2" href="/">กลับหน้าขาย</a>
+    </div>
+</div>

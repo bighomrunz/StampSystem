@@ -1,0 +1,120 @@
+@page
+@using CoffeeStamp.Web.Domain
+@model CoffeeStamp.Web.Pages.Admin.SettingsModel
+@{
+    ViewData["Title"] = "ตั้งค่าร้าน";
+}
+
+<h1>ตั้งค่าร้าน</h1>
+
+<nav class="row-actions mt-1">
+    <a class="btn btn-sm btn-outline" href="/Admin/Settings">ตั้งค่า</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Menu">เมนู</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Staff">พนักงาน</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Devices">อุปกรณ์</a>
+</nav>
+
+@if (Model.Message is not null)
+{
+    <div class="alert alert-ok mt-2">@Model.Message</div>
+}
+@if (Model.Error is not null)
+{
+    <div class="alert alert-error mt-2">@Model.Error</div>
+}
+
+<form method="post" class="card mt-2">
+    <div class="card-title">ข้อมูลร้านและพร้อมเพย์</div>
+
+    <div class="field">
+        <label asp-for="Input.ShopName">ชื่อร้าน</label>
+        <input asp-for="Input.ShopName" maxlength="100" />
+    </div>
+
+    <div class="field-row">
+        <div class="field">
+            <label asp-for="Input.PromptPayIdType">ชนิดเลขพร้อมเพย์</label>
+            <select asp-for="Input.PromptPayIdType">
+                <option value="@PromptPayIdType.Mobile">เบอร์มือถือ</option>
+                <option value="@PromptPayIdType.NationalId">เลขบัตรประชาชน / เลขผู้เสียภาษี</option>
+                <option value="@PromptPayIdType.EWalletId">เลข e-Wallet</option>
+            </select>
+        </div>
+        <div class="field">
+            <label asp-for="Input.PromptPayId">เลขพร้อมเพย์</label>
+            <input asp-for="Input.PromptPayId" maxlength="20" inputmode="numeric" />
+        </div>
+        <div class="field">
+            <label asp-for="Input.PromptPayMerchantName">ชื่อผู้รับเงินใน QR (ภาษาอังกฤษ)</label>
+            <input asp-for="Input.PromptPayMerchantName" maxlength="50" />
+        </div>
+    </div>
+    <p class="hint">ชื่อผู้รับเงินใส่ได้เฉพาะตัวอักษรอังกฤษและตัวเลข ตามข้อกำหนดของ QR</p>
+
+    <div class="card-title mt-2">กฎแต้ม (มีผลตั้งแต่ Phase 2)</div>
+    <div class="field-row">
+        <div class="field">
+            <label asp-for="Input.StampsPerReward">ครบกี่แต้มแลกฟรี 1 แก้ว</label>
+            <input asp-for="Input.StampsPerReward" type="number" min="1" max="100" />
+        </div>
+        <div class="field">
+            <label asp-for="Input.StampExpiryMonths">อายุแต้ม (เดือน, 0 = ไม่หมดอายุ)</label>
+            <input asp-for="Input.StampExpiryMonths" type="number" min="0" max="120" />
+        </div>
+    </div>
+
+    <div class="field-row">
+        <div class="field">
+            <label asp-for="Input.RewardMode">โหมดรางวัล</label>
+            <select asp-for="Input.RewardMode">
+                <option value="@RewardMode.AllItems">แลกได้ทุกเมนู</option>
+                <option value="@RewardMode.SelectedItems">แลกได้เฉพาะเมนูที่กำหนด</option>
+                <option value="@RewardMode.PriceCap">แลกได้ไม่เกินเพดานราคา</option>
+            </select>
+        </div>
+        <div class="field">
+            <label asp-for="Input.RewardPriceCap">เพดานราคารางวัล (บาท)</label>
+            <input asp-for="Input.RewardPriceCap" type="number" step="0.01" min="0" />
+        </div>
+    </div>
+
+    <div class="checkbox">
+        <input asp-for="Input.AllowRewardTopUp" type="checkbox" />
+        <label asp-for="Input.AllowRewardTopUp" style="margin:0">
+            ให้ลูกค้าจ่ายส่วนต่างได้ถ้าเมนูเกินเพดาน
+        </label>
+    </div>
+
+    <div class="field-row">
+        <div class="field">
+            <label asp-for="Input.MaxStampsPerOrder">แต้มสูงสุดต่อออเดอร์ (เกินต้องใช้ PIN ผู้จัดการ)</label>
+            <input asp-for="Input.MaxStampsPerOrder" type="number" min="1" max="100" />
+        </div>
+        <div class="field">
+            <label asp-for="Input.MaxStampsPerDayPerCustomer">แต้มสูงสุดต่อลูกค้าต่อวัน</label>
+            <input asp-for="Input.MaxStampsPerDayPerCustomer" type="number" min="1" max="100" />
+        </div>
+    </div>
+
+    <div class="card-title mt-2">การทำงานหน้าร้าน</div>
+    <div class="field-row">
+        <div class="field">
+            <label asp-for="Input.OpenTime">เวลาเปิดร้าน</label>
+            <input asp-for="Input.OpenTime" type="time" />
+        </div>
+        <div class="field">
+            <label asp-for="Input.CloseTime">เวลาปิดร้าน</label>
+            <input asp-for="Input.CloseTime" type="time" />
+        </div>
+        <div class="field">
+            <label asp-for="Input.VarianceAlertThreshold">เกณฑ์ส่วนต่างที่ถือว่าผิดปกติ (บาท)</label>
+            <input asp-for="Input.VarianceAlertThreshold" type="number" step="0.01" min="0" />
+        </div>
+        <div class="field">
+            <label asp-for="Input.StaffIdleTimeoutMinutes">ล็อกเอาต์เมื่อไม่ใช้งาน (นาที)</label>
+            <input asp-for="Input.StaffIdleTimeoutMinutes" type="number" min="1" max="240" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-green btn-block btn-lg mt-2">บันทึกการตั้งค่า</button>
+</form>

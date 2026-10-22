@@ -1,0 +1,98 @@
+@page "/Pos"
+@model IndexModel
+@{
+    ViewData["Title"] = "ขาย";
+}
+
+<h1>ขายและรับเงิน</h1>
+
+@if (!Model.HasDevice)
+{
+    <div class="alert alert-error">
+        เครื่องนี้ยังไม่ได้ลงทะเบียนเป็นอุปกรณ์ของร้าน จึงยังขายไม่ได้
+        เพราะทุกออเดอร์ต้องบันทึกว่าทำจากเครื่องไหน
+        @if (Model.IsManager)
+        {
+            <text>— ไปที่ <a href="/Admin/Devices">ตั้งค่า → อุปกรณ์</a> สร้างรหัส แล้วลงทะเบียนที่
+            <a href="/Device/Register">หน้าลงทะเบียนอุปกรณ์</a></text>
+        }
+        else
+        {
+            <text>— แจ้งผู้จัดการให้ลงทะเบียนเครื่องนี้ก่อน</text>
+        }
+    </div>
+}
+
+@if (Model.UnclosedDates.Count > 0 && Model.IsManager)
+{
+    <div class="alert alert-warn">
+        ยังไม่ได้ปิดยอดของวัน @string.Join(", ", Model.UnclosedDates.Select(d => d.ToString("dd/MM/yyyy")))
+        — <a href="/DailyClose?date=@Model.UnclosedDates[0].ToString("yyyy-MM-dd")">ไปปิดยอด</a>
+    </div>
+}
+
+<div class="pos">
+    <section>
+        <div id="menu-root" aria-live="polite">
+            <p class="text-muted">กำลังโหลดเมนู…</p>
+        </div>
+    </section>
+
+    <aside class="card cart">
+        <div class="card-title">ออเดอร์นี้</div>
+        <ul class="cart-lines" id="cart-lines"></ul>
+        <p class="cart-empty" id="cart-empty">ยังไม่ได้เลือกเมนู แตะที่เมนูเพื่อเพิ่ม</p>
+
+        <div class="cart-total">
+            <span>รวม</span>
+            <span class="mono"><span id="cart-total">0.00</span> ฿</span>
+        </div>
+
+        <div class="field">
+            <label for="order-note">หมายเหตุ (ไม่บังคับ)</label>
+            <input type="text" id="order-note" maxlength="300" autocomplete="off" />
+        </div>
+
+        <div class="pay-buttons">
+            <button type="button" class="btn btn-lg btn-green" data-pay="Cash" disabled>เงินสด</button>
+            <button type="button" class="btn btn-lg" data-pay="PromptPay" disabled>พร้อมเพย์</button>
+            <button type="button" class="btn btn-lg btn-amber" data-pay="PaoTang" disabled>เป๋าตัง</button>
+            <button type="button" class="btn btn-outline" id="cart-clear" disabled>ล้างออเดอร์</button>
+        </div>
+    </aside>
+</div>
+
+<div class="modal-backdrop" id="qr-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="qr-title">
+        <h2 id="qr-title">สแกนจ่ายพร้อมเพย์</h2>
+        <div class="qr-box">
+            <div class="qr-amount mono"><span id="qr-amount">0.00</span> ฿</div>
+            <img id="qr-image" alt="QR พร้อมเพย์ของออเดอร์นี้" />
+            <p class="hint">QR นี้ระบุยอดไว้แล้ว ลูกค้าแก้ยอดเองไม่ได้</p>
+            <p class="hint">ออเดอร์ <span id="qr-order-no" class="mono"></span></p>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-green" id="qr-confirm">รับเงินแล้ว</button>
+            <button type="button" class="btn btn-outline" id="qr-cancel">ยกเลิกออเดอร์</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="paotang-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="paotang-title">
+        <h2 id="paotang-title">รับเงินผ่านเป๋าตัง</h2>
+        <p>ให้ลูกค้าจ่ายผ่านแอปถุงเงินของร้าน แล้วตรวจยอดในแอปก่อนกดยืนยัน</p>
+        <div class="qr-amount mono"><span id="paotang-amount">0.00</span> ฿</div>
+        <p class="hint">ออเดอร์ <span id="paotang-order-no" class="mono"></span></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-green" id="paotang-confirm">รับเงินแล้ว</button>
+            <button type="button" class="btn btn-outline" id="paotang-cancel">ยกเลิกออเดอร์</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/scan.js" asp-append-version="true"></script>
+    <script src="~/js/customer-picker.js" asp-append-version="true"></script>
+    <script src="~/js/pos.js" asp-append-version="true"></script>
+}

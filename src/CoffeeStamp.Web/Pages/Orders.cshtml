@@ -1,0 +1,177 @@
+@page
+@using CoffeeStamp.Web.Domain
+@using CoffeeStamp.Web.Services
+@model OrdersModel
+@{
+    ViewData["Title"] = "ออเดอร์";
+}
+
+<h1>ออเดอร์ของวัน @Model.BusinessDate.ToString("dd/MM/yyyy")</h1>
+
+<form method="get" class="card">
+    <div class="field-row">
+        <div class="field">
+            <label for="date">เลือกวันทำการ</label>
+            <input type="date" id="date" name="date" value="@Model.BusinessDate.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="field" style="display:flex; align-items:flex-end;">
+            <button type="submit" class="btn btn-outline">ดู</button>
+        </div>
+    </div>
+</form>
+
+@if (Model.IsClosed)
+{
+    <div class="alert alert-warn mt-2">วันนี้ปิดยอดแล้ว แก้ไขออเดอร์ไม่ได้</div>
+}
+
+@if (Model.LoadError is not null)
+{
+    <div class="alert alert-error mt-2">@Model.LoadError</div>
+}
+
+<div class="summary-grid mt-2">
+    <div class="stat">
+        <div class="label">ยอดขายที่รับเงินแล้ว</div>
+        <div class="value mono">@Money.Format(Model.PaidTotal) ฿</div>
+    </div>
+    <div class="stat">
+        <div class="label">จำนวนออเดอร์</div>
+        <div class="value mono">@Model.PaidCount</div>
+    </div>
+    <div class="stat">
+        <div class="label">รอยืนยันรับเงิน</div>
+        <div class="value mono">@Model.PendingCount</div>
+    </div>
+    <div class="stat">
+        <div class="label">ยกเลิกหลังรับเงิน</div>
+        <div class="value mono">@Model.VoidedCount</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>เลขออเดอร์</th>
+                    <th>เวลา</th>
+                    <th>รายการ</th>
+                    <th class="num">ยอด</th>
+                    <th>ช่องทาง</th>
+                    <th>สถานะ</th>
+                    <th>แต้ม</th>
+                    <th>พนักงาน</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Orders.Count == 0)
+                {
+                    <tr><td colspan="9" class="text-muted">ยังไม่มีออเดอร์ในวันนี้</td></tr>
+                }
+                @foreach (var order in Model.Orders)
+                {
+                    <tr>
+                        <td class="mono">@order.OrderNo</td>
+                        <td class="mono">@BangkokTime.FormatTime(order.CreatedAt)</td>
+                        <td>
+                            @string.Join(", ", order.Items.Select(i => $"{i.NameSnapshot} x{i.Quantity}"))
+                            @if (order.VoidReason is not null)
+                            {
+                                <div class="hint">เหตุผล: @order.VoidReason</div>
+                            }
+                        </td>
+                        <td class="num mono">@Money.Format(order.Total)</td>
+                        <td>@Model.PaymentLabel(order.PaymentMethod)</td>
+                        <td>
+                            <span class="badge @Model.StatusClass(order.Status)">
+                                @Model.StatusLabel(order.Status)
+                            </span>
+                        </td>
+                        <td>
+                            @if (order.CustomerId is not null)
+                            {
+                                <span class="badge badge-paid">ออกแต้มแล้ว</span>
+                                <div class="hint">@order.Customer?.DisplayName</div>
+                                @if (!Model.IsClosed && Model.IsToday)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline"
+                                            data-transfer-order="@order.Id"
+                                            data-order-no="@order.OrderNo">
+                                        สแตมป์ผิดคน
+                                    </button>
+                                }
+                            }
+                            else if (order.Status == OrderStatus.Paid
+                                     && order.EligibleStampCount > 0
+                                     && !Model.IsClosed
+                                     && Model.IsToday)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline"
+                                        data-stamp-order="@order.Id"
+                                        data-order-no="@order.OrderNo"
+                                        data-stamps="@order.EligibleStampCount">
+                                    ออกแต้ม @order.EligibleStampCount
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>@order.Staff?.Name</td>
+                        <td class="row-actions">
+                            @if (!Model.IsClosed && order.Status == OrderStatus.Pending)
+                            {
+                                <button type="button" class="btn btn-sm btn-green"
+                                        data-confirm-order="@order.Id">รับเงินแล้ว</button>
+                                <button type="button" class="btn btn-sm btn-outline"
+                                        data-cancel-order="@order.Id">ยกเลิก</button>
+                            }
+                            @if (!Model.IsClosed && order.Status == OrderStatus.Paid && Model.IsManager)
+                            {
+                                <button type="button" class="btn btn-sm btn-red"
+                                        data-void-order="@order.Id"
+                                        data-order-no="@order.OrderNo">ยกเลิกออเดอร์</button>
+                            }
+                            @if (order.PaymentMethod == PaymentMethod.PromptPay
+                                 && order.Status == OrderStatus.Pending)
+                            {
+                                <a class="btn btn-sm btn-outline"
+                                   href="/api/orders/@order.Id/promptpay-qr" target="_blank">ดู QR</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="void-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="void-title">
+        <h2 id="void-title">ยกเลิกออเดอร์ <span id="void-order-no" class="mono"></span></h2>
+        <p class="hint">
+            การยกเลิกออเดอร์ที่รับเงินแล้วต้องใช้ PIN ผู้จัดการ และระบบจะบันทึกไว้ใน audit log
+        </p>
+        <div class="field">
+            <label for="void-reason">เหตุผล</label>
+            <input type="text" id="void-reason" maxlength="300" autocomplete="off" />
+        </div>
+        <div class="field">
+            <label for="void-pin">PIN ผู้จัดการ</label>
+            <input type="password" id="void-pin" inputmode="numeric" maxlength="6" autocomplete="off" />
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-red" id="void-submit">ยืนยันยกเลิก</button>
+            <button type="button" class="btn btn-outline" id="void-close">ปิด</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/scan.js" asp-append-version="true"></script>
+    <script src="~/js/customer-picker.js" asp-append-version="true"></script>
+    <script src="~/js/orders.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,36 @@
+@page
+@model CoffeeStamp.Web.Pages.Device.RegisterModel
+@{
+    ViewData["Title"] = "ลงทะเบียนอุปกรณ์";
+}
+
+<div class="pin-wrap">
+    <h1>ลงทะเบียนอุปกรณ์</h1>
+
+    @if (Model.Error is not null)
+    {
+        <div class="alert alert-error">@Model.Error</div>
+    }
+
+    @if (Model.RegisteredName is not null)
+    {
+        <div class="alert alert-ok">
+            ลงทะเบียนเครื่องนี้เป็น <strong>@Model.RegisteredName</strong> แล้ว
+        </div>
+        <a class="btn btn-green btn-block" href="/Staff/Login">ไปหน้าเข้าสู่ระบบ</a>
+    }
+    else
+    {
+        <form method="post" class="card">
+            <div class="field">
+                <label for="Code">รหัสลงทะเบียน 6 หลักจากผู้จัดการ</label>
+                <input type="text" id="Code" name="Code" value="@Model.Code" maxlength="10"
+                       autocomplete="off" autocapitalize="characters" spellcheck="false" required />
+            </div>
+            <p class="hint">
+                ขอรหัสได้จากผู้จัดการที่หน้าตั้งค่า → อุปกรณ์ รหัสหนึ่งชุดใช้ได้กับเครื่องเดียว
+            </p>
+            <button type="submit" class="btn btn-green btn-block">ลงทะเบียนเครื่องนี้</button>
+        </form>
+    }
+</div>

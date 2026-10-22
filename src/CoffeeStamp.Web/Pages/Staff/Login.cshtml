@@ -1,0 +1,73 @@
+@page
+@model CoffeeStamp.Web.Pages.Staff.LoginModel
+@{
+    ViewData["Title"] = "เข้าสู่ระบบ";
+}
+
+<div class="pin-wrap">
+    <div class="brand-mark">
+        <img src="~/icons/favicon.svg" alt="" />
+        <span class="brand-name">@Model.ShopName</span>
+    </div>
+    <p class="eyebrow" style="text-align:center">แอปพนักงาน</p>
+
+    @if (!Model.DeviceAllowed)
+    {
+        <div class="alert alert-error">
+            อุปกรณ์นี้ยังไม่ได้ลงทะเบียน ขอรหัสลงทะเบียนจากผู้จัดการแล้ว
+            <a href="/Device/Register">ลงทะเบียนอุปกรณ์</a>
+        </div>
+    }
+    else if (Model.IsBootstrap)
+    {
+        <div class="alert alert-warn">
+            ยังไม่มีอุปกรณ์ที่ลงทะเบียน ตอนนี้อยู่ในโหมดติดตั้งครั้งแรก
+            หลังล็อกอินให้ไปลงทะเบียนอุปกรณ์ที่หน้าตั้งค่าทันที
+        </div>
+    }
+
+    @if (Model.LoadError is not null)
+    {
+        <div class="alert alert-error">@Model.LoadError</div>
+    }
+
+    <div class="card" id="step-staff">
+        <div class="card-title">เลือกชื่อของคุณ</div>
+        @if (Model.StaffList.Count == 0)
+        {
+            <p class="text-muted">ยังไม่มีพนักงานในระบบ</p>
+        }
+        else
+        {
+            <div class="staff-list">
+                @foreach (var staff in Model.StaffList)
+                {
+                    <button type="button" class="btn btn-lg btn-outline" data-staff-id="@staff.Id">
+                        @staff.Name
+                    </button>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="card" id="step-pin" hidden>
+        <div class="card-title">กรอก PIN ของ <span id="pin-staff-name"></span></div>
+        <div class="pin-display" id="pin-display" aria-live="polite"></div>
+        <div class="keypad">
+            @for (var digit = 1; digit <= 9; digit++)
+            {
+                <button type="button" data-digit="@digit">@digit</button>
+            }
+            <button type="button" data-action="back">⌫</button>
+            <button type="button" data-digit="0">0</button>
+            <button type="button" data-action="submit" class="btn btn-green">เข้า</button>
+        </div>
+        <button type="button" class="btn btn-outline btn-block mt-2" data-action="change-staff">
+            เปลี่ยนชื่อพนักงาน
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/login.js" asp-append-version="true"></script>
+}

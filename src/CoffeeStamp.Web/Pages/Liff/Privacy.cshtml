@@ -1,0 +1,76 @@
+@page "/liff/privacy"
+@model CoffeeStamp.Web.Pages.Liff.PrivacyModel
+@{
+    ViewData["Title"] = "ข้อมูลส่วนบุคคล";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · @Model.ShopName</title>
+    <link rel="icon" href="~/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Lora:wght@400;500&family=Noto+Serif+Thai:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="~/css/brand.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/liff.css" asp-append-version="true" />
+</head>
+<body class="liff-body">
+    <main class="liff-wrap">
+        <header class="liff-header">
+            <div class="liff-shop">@Model.ShopName</div>
+            <div class="liff-sub">การเก็บและใช้ข้อมูลส่วนบุคคล</div>
+        </header>
+
+        <div class="card consent-text">
+            <h2>ข้อมูลที่ร้านเก็บ</h2>
+            <ul>
+                <li>ชื่อ หรือชื่อที่แสดงและรูปโปรไฟล์จากบัญชี LINE (ถ้าสมัครผ่าน LINE)</li>
+                <li>รหัสผู้ใช้ LINE (LINE user ID) สำหรับผูกบัตรและส่งข้อความแจ้งแต้ม</li>
+                <li>เบอร์โทรศัพท์ เฉพาะกรณีที่สมัครกับพนักงานที่เคาน์เตอร์ ใช้สำหรับค้นบัตรของคุณ</li>
+                <li>ประวัติการได้รับ ใช้ และหมดอายุของแต้ม พร้อมหมายเลขออเดอร์และเวลาที่ทำรายการ</li>
+            </ul>
+            <p class="hint">
+                ร้านไม่เก็บอีเมล ที่อยู่ หรือข้อมูลการชำระเงินของคุณไว้ในระบบนี้
+            </p>
+
+            <h2>การสมัครที่เคาน์เตอร์</h2>
+            <p>
+                ในช่วงแรกร้านอาจสมัครสมาชิกให้คุณโดยพนักงานเป็นผู้กรอกชื่อและเบอร์โทร
+                พนักงานจะอ่านข้อความนี้ให้ฟังและขอความยินยอมจากคุณก่อน
+                ระบบจะบันทึกไว้ว่าคุณยินยอมผ่านช่องทางเคาน์เตอร์ เมื่อไร และพนักงานคนใดเป็นผู้บันทึก
+                ภายหลังคุณผูกบัตรเข้ากับบัญชี LINE ได้โดยแจ้งพนักงาน แต้มที่สะสมไว้จะยังอยู่ครบ
+            </p>
+
+            <h2>วัตถุประสงค์</h2>
+            <p>
+                ใช้เพื่อให้บริการบัตรสะสมแต้ม แจ้งเตือนแต้มที่ได้รับ
+                และตรวจสอบความถูกต้องของรายการเมื่อมีข้อโต้แย้ง
+                ร้านไม่ส่งต่อข้อมูลให้บุคคลภายนอกเพื่อการตลาด
+            </p>
+
+            <h2>ระยะเวลาเก็บ</h2>
+            <p>
+                เก็บไว้ตลอดเวลาที่คุณยังเป็นสมาชิก
+                เมื่อถอนความยินยอม ร้านจะปิดบัตรและลบชื่อกับรูปโปรไฟล์ออกทันที
+                แต่ยังเก็บประวัติแต้มที่ผูกกับออเดอร์ไว้เป็นหลักฐานทางบัญชีของร้าน
+                โดยไม่มีข้อมูลที่ระบุตัวคุณได้
+            </p>
+
+            <h2>สิทธิของคุณ</h2>
+            <ul>
+                <li>ขอดูข้อมูลและประวัติแต้มของตัวเองได้จากหน้าบัตร</li>
+                <li>ขอแก้ไขหรือถอนความยินยอมได้จากหน้าบัตร หรือแจ้งพนักงานที่ร้าน</li>
+                <li>ขอให้ลบข้อมูลที่ระบุตัวตนได้ โดยแจ้งที่ร้าน</li>
+            </ul>
+
+            <p class="hint">เวอร์ชันข้อความ: @Model.ConsentVersion</p>
+            <a class="btn btn-outline btn-block mt-2" href="/liff">กลับไปหน้าบัตร</a>
+        </div>
+    </main>
+</body>
+</html>

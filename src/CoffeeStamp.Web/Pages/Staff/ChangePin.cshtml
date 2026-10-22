@@ -1,0 +1,71 @@
+@page
+@model CoffeeStamp.Web.Pages.Staff.ChangePinModel
+@{
+    ViewData["Title"] = "เปลี่ยน PIN";
+}
+
+<div class="pin-wrap">
+    <h1>เปลี่ยน PIN</h1>
+
+    @if (Model.MustChange)
+    {
+        <div class="alert alert-warn">
+            บัญชีนี้ยังใช้ PIN ที่ตั้งมาให้ ต้องเปลี่ยนก่อนเริ่มใช้งาน
+        </div>
+    }
+
+    <div class="card">
+        <div class="field">
+            <label for="current-pin">PIN เดิม</label>
+            <input type="password" id="current-pin" inputmode="numeric" autocomplete="off"
+                   maxlength="6" pattern="[0-9]*" />
+        </div>
+        <div class="field">
+            <label for="new-pin">PIN ใหม่ (4-6 หลัก)</label>
+            <input type="password" id="new-pin" inputmode="numeric" autocomplete="off"
+                   maxlength="6" pattern="[0-9]*" />
+        </div>
+        <div class="field">
+            <label for="confirm-pin">ยืนยัน PIN ใหม่</label>
+            <input type="password" id="confirm-pin" inputmode="numeric" autocomplete="off"
+                   maxlength="6" pattern="[0-9]*" />
+        </div>
+        <p class="hint">ห้ามใช้เลขซ้ำกันทั้งหมด เช่น 1111 และห้ามใช้เลขเรียง เช่น 1234</p>
+        <button type="button" class="btn btn-green btn-block" id="save-pin">บันทึก PIN ใหม่</button>
+        <button type="button" class="btn btn-outline btn-block mt-2" data-logout>ออกจากระบบ</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            "use strict";
+            const api = window.CoffeeStamp.api;
+            const toast = window.CoffeeStamp.toast;
+
+            document.getElementById("save-pin").addEventListener("click", async function () {
+                const current = document.getElementById("current-pin").value;
+                const next = document.getElementById("new-pin").value;
+                const confirm = document.getElementById("confirm-pin").value;
+
+                if (next !== confirm) {
+                    toast("PIN ใหม่สองช่องไม่ตรงกัน", "error");
+                    return;
+                }
+
+                try {
+                    const result = await api.post("/api/staff/change-pin", {
+                        currentPin: current,
+                        newPin: next
+                    });
+                    toast("เปลี่ยน PIN แล้ว กรุณาเข้าสู่ระบบใหม่", "success");
+                    setTimeout(function () {
+                        window.location.href = result.redirectTo || "/Staff/Login";
+                    }, 900);
+                } catch (err) {
+                    toast(err.message, "error");
+                }
+            });
+        })();
+    </script>
+}

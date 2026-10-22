@@ -1,0 +1,47 @@
+/* ==========================================================================
+   MInDCoffee — Corporate Identity tokens
+   คัดมาจาก CoffeeTemplate/src/styles/tokens.css เพื่อให้แอปพนักงานกับเว็บร้าน
+   ใช้สีและตัวอักษรชุดเดียวกัน ถ้าแก้ CI ให้แก้ที่เว็บร้านก่อนแล้วค่อยซิงก์มาที่นี่
+   ========================================================================== */
+
+:root {
+    /* --- พาเลตต์แบรนด์ (ห้ามเพิ่มสีใหม่นอกห้าสีนี้) --- */
+    --emerald-900: #0f3d34;
+    --emerald-700: #134e43;
+    --mint-100: #e6f0e9;
+    --cream-50: #f7f6f1;
+    --gold-400: #c8a96a;
+
+    /* --- เฉดที่ไล่มาจากห้าสีข้างบน ไม่ใช่สีใหม่ --- */
+    --emerald-950: #0a2a24;
+    --emerald-800: #11443b;
+    --emerald-600: #1a6155;
+    --gold-300: #dcc48c;
+    --gold-500: #b1915a;
+
+    /* --- สีสถานะ ปรับให้เข้าโทนแบรนด์ ไม่ใช้แดง/เขียวสดแบบ default --- */
+    --ok-700: #1a6155;
+    --ok-100: #dfeee6;
+    --warn-700: #8a6a24;
+    --warn-100: #f5ecd8;
+    --danger-700: #8f2f24;
+    --danger-100: #f6e2de;
+
+    /* --- ตัวอักษร: Latin ใช้ฟอนต์แบรนด์ ไทยใช้ Noto Serif Thai ให้เข้าชุดกัน --- */
+    --font-display: "Playfair Display", "Noto Serif Thai", "Times New Roman", serif;
+    --font-body: "Lora", "Noto Serif Thai", Georgia, serif;
+    --font-script: "Parisienne", "Playfair Display", cursive;
+    --font-num: "Playfair Display", "Lora", Georgia, serif;
+
+    --tracking-label: 0.26em;
+
+    /* --- เลย์เอาต์ --- */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-pill: 999px;
+    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+    /* --- ขนาดปุ่มสำหรับใช้นิ้วบนแท็บเล็ต (ของเดิมของแอปพนักงาน) --- */
+    --touch: 56px;
+}

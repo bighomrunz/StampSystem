@@ -1,0 +1,136 @@
+@page
+@using CoffeeStamp.Web.Domain
+@model CoffeeStamp.Web.Pages.Admin.StaffModel
+@{
+    ViewData["Title"] = "จัดการพนักงาน";
+}
+
+<h1>จัดการพนักงาน</h1>
+
+<nav class="row-actions mt-1">
+    <a class="btn btn-sm btn-outline" href="/Admin/Settings">ตั้งค่า</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Menu">เมนู</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Staff">พนักงาน</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Devices">อุปกรณ์</a>
+</nav>
+
+@if (Model.Message is not null)
+{
+    <div class="alert alert-ok mt-2">@Model.Message</div>
+}
+@if (Model.Error is not null)
+{
+    <div class="alert alert-error mt-2">@Model.Error</div>
+}
+
+<form method="post" asp-page-handler="Create" class="card mt-2">
+    <div class="card-title">เพิ่มพนักงาน</div>
+    <div class="field-row">
+        <div class="field">
+            <label asp-for="NewStaff.Name">ชื่อ</label>
+            <input asp-for="NewStaff.Name" maxlength="80" required />
+        </div>
+        <div class="field">
+            <label asp-for="NewStaff.Role">สิทธิ์</label>
+            <select asp-for="NewStaff.Role">
+                <option value="@StaffRole.Staff">พนักงาน</option>
+                <option value="@StaffRole.Manager">ผู้จัดการ</option>
+                @if (Model.CanManageOwners)
+                {
+                    <option value="@StaffRole.Owner">เจ้าของร้าน</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label asp-for="NewStaff.Pin">PIN ตั้งต้น (4-6 หลัก)</label>
+            <input asp-for="NewStaff.Pin" inputmode="numeric" maxlength="6" required />
+        </div>
+    </div>
+    <p class="hint">ระบบจะบังคับให้พนักงานเปลี่ยน PIN เองตอนล็อกอินครั้งแรก</p>
+    <button type="submit" class="btn btn-green">เพิ่มพนักงาน</button>
+</form>
+
+<div class="card">
+    <div class="card-title">พนักงานทั้งหมด</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ชื่อและสิทธิ์</th>
+                    <th>สถานะ</th>
+                    <th>เข้าระบบล่าสุด</th>
+                    <th>รีเซ็ต PIN</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var staff in Model.StaffList)
+                {
+                    <tr>
+                        <td>
+                            <form method="post" asp-page-handler="Update" class="field-row"
+                                  style="gap:.35rem; align-items:center;">
+                                <input type="hidden" name="id" value="@staff.Id" />
+                                <input type="text" name="name" value="@staff.Name" maxlength="80"
+                                       style="min-width:160px" required />
+                                <select name="role" style="min-width:140px">
+                                    <option value="@StaffRole.Staff"
+                                            selected="@(staff.Role == StaffRole.Staff)">พนักงาน</option>
+                                    <option value="@StaffRole.Manager"
+                                            selected="@(staff.Role == StaffRole.Manager)">ผู้จัดการ</option>
+                                    @if (Model.CanManageOwners)
+                                    {
+                                        <option value="@StaffRole.Owner"
+                                                selected="@(staff.Role == StaffRole.Owner)">เจ้าของร้าน</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-sm">บันทึก</button>
+                            </form>
+                        </td>
+                        <td>
+                            <span class="badge @(staff.IsActive ? "badge-paid" : "badge-cancelled")">
+                                @(staff.IsActive ? "ใช้งาน" : "ปิดใช้งาน")
+                            </span>
+                            @if (staff.LockedUntil > DateTime.UtcNow)
+                            {
+                                <form method="post" asp-page-handler="Unlock" class="mt-1">
+                                    <input type="hidden" name="id" value="@staff.Id" />
+                                    <span class="badge badge-void">ถูกล็อก</span>
+                                    <button type="submit" class="btn btn-sm btn-outline">ปลดล็อก</button>
+                                </form>
+                            }
+                            @if (staff.MustChangePin)
+                            {
+                                <div class="hint">ต้องเปลี่ยน PIN</div>
+                            }
+                        </td>
+                        <td class="mono">
+                            @(staff.LastLoginAt is null
+                                ? "-"
+                                : CoffeeStamp.Web.Services.BangkokTime.FormatDateTime(staff.LastLoginAt.Value))
+                        </td>
+                        <td>
+                            <form method="post" asp-page-handler="ResetPin" class="field-row"
+                                  style="gap:.35rem; align-items:center;">
+                                <input type="hidden" name="id" value="@staff.Id" />
+                                <input type="text" name="newPin" inputmode="numeric" maxlength="6"
+                                       placeholder="PIN ใหม่" style="width:120px" required />
+                                <button type="submit" class="btn btn-sm btn-amber">รีเซ็ต</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" asp-page-handler="SetActive">
+                                <input type="hidden" name="id" value="@staff.Id" />
+                                <input type="hidden" name="isActive" value="@(!staff.IsActive)" />
+                                <button type="submit" class="btn btn-sm btn-outline">
+                                    @(staff.IsActive ? "ปิดใช้งาน" : "เปิดใช้งาน")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="hint mt-1">ไม่มีการลบพนักงาน เพราะออเดอร์และ audit log อ้างถึงอยู่</p>
+</div>

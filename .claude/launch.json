@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "coffeestamp",
+      "runtimeExecutable": "pwsh",
+      "runtimeArgs": ["-NoProfile", "-File", "start-dev.ps1"],
+      "port": 7111,
+      "url": "https://localhost:7111"
+    },
+    {
+      "name": "ui-preview",
+      "runtimeExecutable": "py",
+      "runtimeArgs": [
+        "-3",
+        "-m",
+        "http.server",
+        "5500",
+        "--directory",
+        "C:/Users/bigho/AppData/Local/Temp/claude/D--website/3aa4114a-3cc8-407f-bf92-b75908f5c853/scratchpad/preview"
+      ],
+      "port": 5500,
+      "url": "http://localhost:5500"
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+@page
+@using CoffeeStamp.Web.Services
+@model CoffeeStamp.Web.Pages.Admin.MenuModel
+@{
+    ViewData["Title"] = "จัดการเมนู";
+}
+
+<h1>จัดการเมนู</h1>
+
+<nav class="row-actions mt-1">
+    <a class="btn btn-sm btn-outline" href="/Admin/Settings">ตั้งค่า</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Menu">เมนู</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Staff">พนักงาน</a>
+    <a class="btn btn-sm btn-outline" href="/Admin/Devices">อุปกรณ์</a>
+</nav>
+
+@if (Model.Message is not null)
+{
+    <div class="alert alert-ok mt-2">@Model.Message</div>
+}
+@if (Model.Error is not null)
+{
+    <div class="alert alert-error mt-2">@Model.Error</div>
+}
+
+<form method="post" asp-page-handler="Create" class="card mt-2">
+    <div class="card-title">เพิ่มเมนูใหม่</div>
+    <div class="field-row">
+        <div class="field">
+            <label asp-for="NewItem.Name">ชื่อเมนู</label>
+            <input asp-for="NewItem.Name" maxlength="100" required />
+        </div>
+        <div class="field">
+            <label asp-for="NewItem.Category">หมวด</label>
+            <input asp-for="NewItem.Category" maxlength="50" list="categories" />
+            <datalist id="categories">
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category"></option>
+                }
+            </datalist>
+        </div>
+        <div class="field">
+            <label asp-for="NewItem.Price">ราคา (บาท)</label>
+            <input asp-for="NewItem.Price" type="number" step="0.01" min="0" required />
+        </div>
+        <div class="field">
+            <label asp-for="NewItem.SortOrder">ลำดับแสดง</label>
+            <input asp-for="NewItem.SortOrder" type="number" />
+        </div>
+    </div>
+    <div class="field-row">
+        <div class="checkbox">
+            <input asp-for="NewItem.EarnsStamp" type="checkbox" />
+            <label asp-for="NewItem.EarnsStamp" style="margin:0">นับแต้ม</label>
+        </div>
+        <div class="checkbox">
+            <input asp-for="NewItem.IsRewardEligible" type="checkbox" />
+            <label asp-for="NewItem.IsRewardEligible" style="margin:0">ใช้แลกรางวัลได้</label>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-green">เพิ่มเมนู</button>
+</form>
+
+<div class="card">
+    <div class="card-title">เมนูทั้งหมด</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ชื่อ</th>
+                    <th>หมวด</th>
+                    <th class="num">ราคา</th>
+                    <th>นับแต้ม</th>
+                    <th>แลกได้</th>
+                    <th class="num">ลำดับ</th>
+                    <th>สถานะ</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <form method="post" asp-page-handler="Update" class="field-row"
+                                  style="gap:.35rem; align-items:center;">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="text" name="name" value="@item.Name" maxlength="100"
+                                       style="min-width:160px" required />
+                                <input type="text" name="category" value="@item.Category" maxlength="50"
+                                       style="min-width:110px" placeholder="หมวด" />
+                                <input type="number" name="price" value="@item.Price" step="0.01" min="0"
+                                       style="width:110px" required />
+                                <input type="number" name="sortOrder" value="@item.SortOrder"
+                                       style="width:90px" />
+                                <label class="checkbox" style="margin:0">
+                                    <input type="checkbox" name="earnsStamp" value="true"
+                                           checked="@item.EarnsStamp" />
+                                    <span class="hint">แต้ม</span>
+                                </label>
+                                <label class="checkbox" style="margin:0">
+                                    <input type="checkbox" name="isRewardEligible" value="true"
+                                           checked="@item.IsRewardEligible" />
+                                    <span class="hint">แลก</span>
+                                </label>
+                                <button type="submit" class="btn btn-sm">บันทึก</button>
+                            </form>
+                        </td>
+                        <td>@item.Category</td>
+                        <td class="num mono">@Money.Format(item.Price)</td>
+                        <td>@(item.EarnsStamp ? "ใช่" : "ไม่")</td>
+                        <td>@(item.IsRewardEligible ? "ใช่" : "ไม่")</td>
+                        <td class="num mono">@item.SortOrder</td>
+                        <td>
+                            <span class="badge @(item.IsActive ? "badge-paid" : "badge-cancelled")">
+                                @(item.IsActive ? "ขายอยู่" : "ปิดการขาย")
+                            </span>
+                        </td>
+                        <td>
+                            <form method="post" asp-page-handler="SetActive">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="isActive" value="@(!item.IsActive)" />
+                                <button type="submit" class="btn btn-sm btn-outline">
+                                    @(item.IsActive ? "ปิดการขาย" : "เปิดขาย")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="hint mt-1">ไม่มีการลบเมนูออกจากระบบ เพราะออเดอร์เก่าอ้างถึงอยู่ ใช้ปิดการขายแทน</p>
+</div>
